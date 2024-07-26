@@ -107,7 +107,6 @@ solve handType symbolToCard input = sum [i * bid | (Play _ bid, i) <- zip (sort 
   where
     typedPlays = typePlays handType $ q symbolToCard input
     len = length typedPlays
-    -- coefs = replicate len 1
     coefs = [1 .. toInteger len]
 
 solver1 = solve handType symbolToCard
