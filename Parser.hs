@@ -52,6 +52,17 @@ parseLetter = charRangeP 65 90
 parseDigit :: Parser Char
 parseDigit = charRangeP 48 57
 
+parseN :: Integer -> Parser a -> Parser [a]
+parseN n p
+  | n == 0 = pure []
+  | otherwise =
+      ( do
+          head <- p
+          tail <- parseN (n - 1) p
+          return (head : tail)
+      )
+        <|> pure []
+
 parseStar :: Parser a -> Parser [a]
 parseStar p =
   ( do
