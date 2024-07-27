@@ -64,13 +64,14 @@ parseN n p
         <|> pure []
 
 parseStar :: Parser a -> Parser [a]
-parseStar p =
-  ( do
-      head <- p
-      tail <- parseStar p
-      return (head : tail)
-  )
-    <|> pure []
+parseStar = many
+
+-- ( do
+--     head <- p
+--     tail <- parseStar p
+--     return (head : tail)
+-- )
+--   <|> pure []
 
 parseOrL :: [String] -> Parser String
 parseOrL = foldl (\pc ch -> parseString ch <|> pc) empty
@@ -87,13 +88,17 @@ parseStarPred pred = Parser $ \input ->
    in Just (rest, token)
 
 parsePlus :: Parser a -> Parser [a]
-parsePlus p = do
-  head <- p
-  tail <- parseStar p
-  return (head : tail)
+parsePlus = some
+
+-- do
+-- head <- p
+-- tail <- parseStar p
+-- return (head : tail)
 
 parseNumber :: Parser Integer
-parseNumber = read <$> parsePlus parseDigit
+parseNumber = do
+  first <- parseDigit <|> parseChar '-'
+  read . (first :) <$> many parseDigit
 
 skipWS :: Parser String
 skipWS = ignoreParse $ parseStarPred isSpace
@@ -102,7 +107,6 @@ parseStarDelim :: Char -> Parser a -> Parser [a]
 parseStarDelim del p =
   ( do
       head <- p
-      skipWS
       tail <- parseStar parseDelimAndP
       return (head : tail)
   )
@@ -111,5 +115,4 @@ parseStarDelim del p =
     parseDelimAndP =
       do
         parseChar del
-        skipWS
         p
